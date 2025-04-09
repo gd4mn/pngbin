@@ -72,18 +72,12 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central_widget)
 
         # setup the screen layout
-        window_layout = QVBoxLayout(central_widget)
-        window_layout.setContentsMargins(0,0,0,0)
-        window_layout.setSpacing(0)
-
-        main_layout = QHBoxLayout()
+        main_layout = QHBoxLayout(central_widget)
         main_layout.setContentsMargins(0,0,0,0)
         main_layout.setSpacing(0)
 
         main_layout.addWidget(EmptyFrame("Canvas Area"))
         main_layout.addWidget(EmptyFrame("Work Area", width=256))
-
-        window_layout.addLayout(main_layout)
 
         # setup the status bar
         status_bar = D4mnStatusBar()
