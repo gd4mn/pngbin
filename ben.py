@@ -2,6 +2,7 @@ from debugging import console, DEBUG as DEBUG, LOG_LEVEL as LOG_LEVEL
 import sys
 from PySide6.QtWidgets import (
     QApplication,
+    QPushButton,
     QMainWindow,
     QHBoxLayout,
     QLabel,
@@ -36,52 +37,59 @@ class EmptyFrame(QWidget):
 
         empty_message = QLabel(message)
         empty_message.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        empty_message.setStyleSheet(EMPTY_FILL_STYLE)
+        empty_message.setStyleSheet(DEBUG_FILL_STYLE)
         empty_layout.addWidget(empty_message)
 
         if DEBUG:
             self.setStyleSheet(DEBUG_FILL_STYLE)
 
 
-class D4mnStatusBar(QStatusBar):
-    def __init__(self):
-        super().__init__()
+class D4mnPushButtton(QPushButton):
+    def __init__(self, key:str = "", text:str = "", path:str = ""):
+        super().__init__(text)
+        self.path=path
+        self.setStyleSheet("border: 0px;")
+        
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(2, 2, 2, 2)
+        layout.setSpacing(2)
 
-        self.Well_1 = QLabel("Well 1")
-        self.Well_2 = QLabel("Well 2")
+        key_frame = QLabel(key)
+        key_frame.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        key_frame.setStyleSheet(EMPTY_FILL_STYLE)
+        if DEBUG:
+            key_frame.setStyleSheet(DEBUG_FILL_STYLE)
+        layout.addWidget(key_frame)
 
-        self.addPermanentWidget(self.Well_1)
-        self.addPermanentWidget(self.Well_2)
-    
-    def set_message(self, message: str):
-        self.showMessage(message)
-    
-    def set_well_1(self, message: str):
-        self.Well_1.setText(message)
+        text_frame = QLabel(text)
+        text_frame.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        text_frame.setStyleSheet(EMPTY_FILL_STYLE)
+        if DEBUG:
+            text_frame.setStyleSheet(DEBUG_FILL_STYLE)
 
-    def set_well_2(self, message: str):
-        self.Well_2.setText(message)
+        layout.addWidget(text_frame)
+
+        # add the fill style for debugging
+        if DEBUG:
+            self.setStyleSheet(DEBUG_FILL_STYLE)
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Workbench")
-        self.setMinimumSize(800, 600)
+        self.setMinimumSize(256, 256)
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
         # setup the screen layout
-        main_layout = QHBoxLayout(central_widget)
-        main_layout.setContentsMargins(0,0,0,0)
-        main_layout.setSpacing(0)
+        window_layout = QVBoxLayout(central_widget)
+        window_layout.setContentsMargins(2, 2, 2, 2)
+        window_layout.setSpacing(2)
 
-        main_layout.addWidget(EmptyFrame("Canvas Area"))
-        main_layout.addWidget(EmptyFrame("Work Area", width=256))
-
-        # setup the status bar
-        status_bar = D4mnStatusBar()
-        self.setStatusBar(status_bar)
+        
+        button = D4mnPushButtton("1", "Untitled button")
+        window_layout.addWidget(button)
 
 
 def main():
