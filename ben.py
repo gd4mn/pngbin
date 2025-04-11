@@ -1,104 +1,93 @@
-DEBUG_FILL_STYLE = ""
-from qdbg import DEBUG, DEBUG_FILL_STYLE, LOG_LEVEL, console
-
 import sys
-import os
-import argparse
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QImage, QKeyEvent, QPixmap
+from PySide6.QtGui import QKeyEvent
 from PySide6.QtWidgets import (
     QApplication,
-    QDialog,
-    QHBoxLayout,
-    QLabel,
     QMainWindow,
-    QPushButton,
-    QSizePolicy,
-    QStatusBar,
-    QVBoxLayout,
     QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QLabel,
+    QSizePolicy,
 )
 
+from qdbg import console  # Assuming DEBUG, DEBUG_FILL_STYLE, LOG_LEVEL are not used
 
-class D4mnPushButtton(QPushButton):
-    button_stylesheet = """
+
+class NumberedButton(QPushButton):  # More descriptive name
+    """A push button with a leading number."""
+
+    _BUTTON_STYLESHEET = """
         background-color: #f0f0f0;
-        border: 1px solid black; 
+        border: 1px solid black;
         border-radius: 4px;
         font-size: 16px;
         font-weight: bold;
         padding: 4px;
         """
-    number_stylesheet = """
+
+    _NUMBER_STYLESHEET = """
         background-color: #66CCFF;
         border: 1px solid black;
         border-radius: 4px;
         font-size: 16px;
         """
-    text_stylesheet = """
+
+    _TEXT_STYLESHEET = """
         border: none;
         font-size: 18px;
         """
-    def __init__(self, number: int, text: str):
-        super().__init__()
+
+    def __init__(self, number: int, text: str, parent=None):  # Add parent parameter
+        super().__init__(parent)
         self.num = number
-        self.setStyleSheet(self.button_stylesheet)
+
+        self.setStyleSheet(self._BUTTON_STYLESHEET)
         self.setFixedHeight(32)
 
-        button_layout = QHBoxLayout(self)
-        button_layout.setContentsMargins(2, 2, 2, 2)
-        button_layout.setSpacing(2)
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(2, 2, 2, 2)
+        layout.setSpacing(2)
 
-        number_frame = QLabel(str(number))
-        number_frame.setStyleSheet(self.number_stylesheet)
-        number_frame.setAlignment(
-            Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter
-        )
-        number_frame.setSizePolicy(
-            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred
-        )
-        number_frame.setFixedWidth(self.fontMetrics().boundingRect("999").width())
-        button_layout.addWidget(number_frame)
+        number_label = QLabel(str(number), self)  # Set parent for child widgets
+        number_label.setStyleSheet(self._NUMBER_STYLESHEET)
+        number_label.setAlignment(Qt.AlignCenter)
+        number_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        number_label.setFixedWidth(self.fontMetrics().boundingRect("999").width())
+        layout.addWidget(number_label)
 
-        text_frame = QLabel(text)
-        text_frame.setStyleSheet(self.text_stylesheet)
-        text_frame.setAlignment(
-            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-        )
-        text_frame.setSizePolicy(
-            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred
-        )
-        button_layout.addWidget(text_frame)
+        text_label = QLabel(text, self)  # Set parent for child widgets
+        text_label.setStyleSheet(self._TEXT_STYLESHEET)
+        text_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        text_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        layout.addWidget(text_label)
 
-        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
-        self.setLayout(button_layout)
-        self.setEnabled(True)
-    
     def keyPressEvent(self, event: QKeyEvent):
-       console.info(f"Key pressed: {event.key()}")
-       if event.key() == self.num + Qt.Key.Key_0:
-           console.info(f"Button {self.num} pressed")
-           self.click()
+        console.info(f"Key pressed: {event.key()}")
+        if event.key() == self.num + Qt.Key_0:
+            console.info(f"Button {self.num} pressed")
+            self.click()
 
     def mousePressEvent(self, event):
         console.info(f"Mouse pressed: {event.button()}")
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):  # Add parent parameter
+        super().__init__(parent)
         self.setWindowTitle("Workbench")
         self.setMinimumSize(256, 256)
-        central_widget = QWidget()
+
+        central_widget = QWidget(self)  # Set parent for central widget
         self.setCentralWidget(central_widget)
 
-        # setup the screen layout
-        window_layout = QVBoxLayout(central_widget)
-        window_layout.setContentsMargins(2, 2, 2, 2)
-        window_layout.setSpacing(2)
+        layout = QVBoxLayout(central_widget)  # Set parent for layout
+        layout.setContentsMargins(2, 2, 2, 2)
+        layout.setSpacing(2)
 
-        button = D4mnPushButtton("1", "Untitled button")
-        window_layout.addWidget(button)
+        button = NumberedButton(1, "Untitled button", central_widget)  # Use NumberedButton, set parent
+        layout.addWidget(button)
 
     def keyPressEvent(self, event: QKeyEvent):
         console.info(f"Key pressed: {event.key()}")
@@ -110,10 +99,10 @@ def main():
     window.show()
 
     console.info("Starting application ...")
-    app.exec()
+    ret = app.exec()
     console.info("Exiting application ...")
 
-    sys.exit(0)
+    sys.exit(ret)  # Exit with the return code from app.exec()
 
 
 if __name__ == "__main__":
