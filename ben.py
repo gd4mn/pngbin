@@ -24,18 +24,17 @@ MODIFIER_KEYS = {
 }
 
 BUTTON_NUMBERS = [
-    chr(0x24EA),
-    chr(0x2460),
-    chr(0x2461),
-    chr(0x2462),
-    chr(0x2463),
-    chr(0x2464),
-    chr(0x2465),
-    chr(0x2466),
-    chr(0x2467),
-    chr(0x2468),
+    Qt.Key_0,
+    Qt.Key_1,
+    Qt.Key_2,
+    Qt.Key_3,
+    Qt.Key_4,
+    Qt.Key_5,
+    Qt.Key_6,
+    Qt.Key_7,
+    Qt.Key_8,
+    Qt.Key_9,
 ]
-
 
 class NumberedButton(QPushButton):  # More descriptive name
     """A push button with a leading number."""
@@ -87,7 +86,7 @@ class NumberedButton(QPushButton):  # More descriptive name
         layout.addWidget(text_label)
 
     def keyPressEvent(self, event: QKeyEvent):
-        console.info(f"Key pressed: {event.key()}")
+        console.info(f"Key/Combo: {event.qKeyCombination()}")
         if event.key() == self.num + Qt.Key_0:
             console.info(f"Button {self.num} pressed")
             self.click()
@@ -114,8 +113,8 @@ class MainWindow(QMainWindow):
         )  # Use NumberedButton, set parent
         layout.addWidget(button)
 
-    def keyPressEvent(self, event: QKeyEvent):
-        console.info(f"Key pressed: {event.key()}")
+    #def keyPressEvent(self, event: QKeyEvent):
+    #    console.info(f"Key pressed: {event.key()}")
 
 
 def main():
