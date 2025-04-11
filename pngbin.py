@@ -22,6 +22,33 @@ from PySide6.QtWidgets import (
 DEFAULT_FRAME_SPACING = 8
 
 
+class ImageItem:
+    def __init__(self, path: str):
+        self.name = os.path.basename(path)
+        self.dir = os.path.dirname(path)
+
+    def put(self, new_dir: str):
+        self.dir = new_dir
+
+    def move(self):
+        pass
+
+    def delete(self):
+        pass
+
+    def __repr__(self):
+        return f"ImageItem(name={self.name}, dir={self.dir})"
+
+    def __str__(self):
+        return f"ImageItem({self.dir + self.name})"
+
+
+# global variables
+source_dir = ""
+gallery_dir = ""
+image_list: list[ImageItem] = []
+
+
 class D4mnPushButton(QPushButton):
     button_stylesheet = """
         background-color: #f0f0f0;
@@ -41,6 +68,7 @@ class D4mnPushButton(QPushButton):
         border: none;
         font-size: 18px;
         """
+
     def __init__(self, number: int, text: str):
         super().__init__()
         self.num = number
@@ -75,12 +103,12 @@ class D4mnPushButton(QPushButton):
         self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         self.setLayout(button_layout)
         self.setEnabled(True)
-    
+
     def keyPressEvent(self, event: QKeyEvent):
-       console.info(f"Key pressed: {event.key()}")
-       if event.key() == self.num + Qt.Key.Key_0:
-           console.info(f"Button {self.num} pressed")
-           self.click()
+        console.info(f"Key pressed: {event.key()}")
+        if event.key() == self.num + Qt.Key.Key_0:
+            console.info(f"Button {self.num} pressed")
+            self.click()
 
     def mousePressEvent(self, event):
         console.info(f"Mouse pressed: {event.button()}")

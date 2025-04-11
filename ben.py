@@ -19,8 +19,6 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-DEBUG_FILL_STYLE = "background-color: rgba(255, 0, 255, 0.2);"
-
 
 class D4mnPushButtton(QPushButton):
     button_stylesheet = """
