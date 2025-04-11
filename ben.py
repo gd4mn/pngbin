@@ -1,77 +1,89 @@
-from debugging import console, DEBUG as DEBUG, LOG_LEVEL as LOG_LEVEL
+DEBUG_FILL_STYLE = ""
+from qdbg import DEBUG, DEBUG_FILL_STYLE, LOG_LEVEL, console
+
 import sys
+import os
+import argparse
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QImage, QKeyEvent, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
-    QPushButton,
-    QMainWindow,
+    QDialog,
     QHBoxLayout,
     QLabel,
+    QMainWindow,
+    QPushButton,
     QSizePolicy,
     QStatusBar,
     QVBoxLayout,
     QWidget,
 )
-from PySide6 import QtCore
-from rich.traceback import install
 
 DEBUG_FILL_STYLE = "background-color: rgba(255, 0, 255, 0.2);"
-EMPTY_FILL_STYLE = """
-    background-color: rgb(255, 0, 255); 
-    color: rgb(255, 255, 255);
-    font-size: 12px;
-    font-weight: bold;
-"""
-
-
-class EmptyFrame(QWidget):
-    def __init__(self, message: str = "", width: int = 0, height: int = 0):
-        super().__init__()
-
-        if width:
-            self.setFixedWidth(width)
-        if height:
-            self.setFixedHeight(height)
-
-        empty_layout = QVBoxLayout()
-        self.setLayout(empty_layout)
-
-        empty_message = QLabel(message)
-        empty_message.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        empty_message.setStyleSheet(DEBUG_FILL_STYLE)
-        empty_layout.addWidget(empty_message)
-
-        if DEBUG:
-            self.setStyleSheet(DEBUG_FILL_STYLE)
 
 
 class D4mnPushButtton(QPushButton):
-    def __init__(self, key:str = "", text:str = "", path:str = ""):
-        super().__init__(text)
-        self.path=path
-        self.setStyleSheet("border: 0px;")
-        
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(2, 2, 2, 2)
-        layout.setSpacing(2)
+    button_stylesheet = """
+        background-color: #f0f0f0;
+        border: 1px solid black; 
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 4px;
+        """
+    number_stylesheet = """
+        background-color: #66CCFF;
+        border: 1px solid black;
+        border-radius: 4px;
+        font-size: 16px;
+        """
+    text_stylesheet = """
+        border: none;
+        font-size: 18px;
+        """
+    def __init__(self, number: int, text: str):
+        super().__init__()
+        self.num = number
+        self.setStyleSheet(self.button_stylesheet)
+        self.setFixedHeight(32)
 
-        key_frame = QLabel(key)
-        key_frame.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter | QtCore.Qt.AlignmentFlag.AlignVCenter)
-        key_frame.setStyleSheet(EMPTY_FILL_STYLE)
-        if DEBUG:
-            key_frame.setStyleSheet(DEBUG_FILL_STYLE)
-        layout.addWidget(key_frame)
+        button_layout = QHBoxLayout(self)
+        button_layout.setContentsMargins(2, 2, 2, 2)
+        button_layout.setSpacing(2)
+
+        number_frame = QLabel(str(number))
+        number_frame.setStyleSheet(self.number_stylesheet)
+        number_frame.setAlignment(
+            Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter
+        )
+        number_frame.setSizePolicy(
+            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred
+        )
+        number_frame.setFixedWidth(self.fontMetrics().boundingRect("999").width())
+        button_layout.addWidget(number_frame)
 
         text_frame = QLabel(text)
-        text_frame.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
-        text_frame.setStyleSheet(EMPTY_FILL_STYLE)
-        if DEBUG:
-            text_frame.setStyleSheet(DEBUG_FILL_STYLE)
+        text_frame.setStyleSheet(self.text_stylesheet)
+        text_frame.setAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
+        text_frame.setSizePolicy(
+            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred
+        )
+        button_layout.addWidget(text_frame)
 
-        layout.addWidget(text_frame)
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        self.setLayout(button_layout)
+        self.setEnabled(True)
+    
+    def keyPressEvent(self, event: QKeyEvent):
+       console.info(f"Key pressed: {event.key()}")
+       if event.key() == self.num + Qt.Key.Key_0:
+           console.info(f"Button {self.num} pressed")
+           self.click()
 
-        # add the fill style for debugging
-        if DEBUG:
-            self.setStyleSheet(DEBUG_FILL_STYLE)
+    def mousePressEvent(self, event):
+        console.info(f"Mouse pressed: {event.button()}")
 
 
 class MainWindow(QMainWindow):
@@ -87,9 +99,11 @@ class MainWindow(QMainWindow):
         window_layout.setContentsMargins(2, 2, 2, 2)
         window_layout.setSpacing(2)
 
-        
         button = D4mnPushButtton("1", "Untitled button")
         window_layout.addWidget(button)
+
+    def keyPressEvent(self, event: QKeyEvent):
+        console.info(f"Key pressed: {event.key()}")
 
 
 def main():

@@ -2,8 +2,10 @@ DEBUG_FILL_STYLE = ""
 from qdbg import DEBUG, DEBUG_FILL_STYLE, LOG_LEVEL, console
 
 import sys
+import os
+import argparse
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtGui import QImage, QKeyEvent, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
@@ -11,6 +13,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMainWindow,
     QPushButton,
+    QSizePolicy,
     QStatusBar,
     QVBoxLayout,
     QWidget,
@@ -18,8 +21,75 @@ from PySide6.QtWidgets import (
 
 DEFAULT_FRAME_SPACING = 8
 
+
+class D4mnPushButton(QPushButton):
+    button_stylesheet = """
+        background-color: #f0f0f0;
+        border: 1px solid black; 
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 4px;
+        """
+    number_stylesheet = """
+        background-color: #66CCFF;
+        border: 1px solid black;
+        border-radius: 4px;
+        font-size: 16px;
+        """
+    text_stylesheet = """
+        border: none;
+        font-size: 18px;
+        """
+    def __init__(self, number: int, text: str):
+        super().__init__()
+        self.num = number
+        self.setStyleSheet(self.button_stylesheet)
+        self.setFixedHeight(32)
+
+        button_layout = QHBoxLayout(self)
+        button_layout.setContentsMargins(2, 2, 2, 2)
+        button_layout.setSpacing(2)
+
+        number_frame = QLabel(str(number))
+        number_frame.setStyleSheet(self.number_stylesheet)
+        number_frame.setAlignment(
+            Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter
+        )
+        number_frame.setSizePolicy(
+            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred
+        )
+        number_frame.setFixedWidth(self.fontMetrics().boundingRect("999").width())
+        button_layout.addWidget(number_frame)
+
+        text_frame = QLabel(text)
+        text_frame.setStyleSheet(self.text_stylesheet)
+        text_frame.setAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
+        text_frame.setSizePolicy(
+            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred
+        )
+        button_layout.addWidget(text_frame)
+
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        self.setLayout(button_layout)
+        self.setEnabled(True)
+    
+    def keyPressEvent(self, event: QKeyEvent):
+       console.info(f"Key pressed: {event.key()}")
+       if event.key() == self.num + Qt.Key.Key_0:
+           console.info(f"Button {self.num} pressed")
+           self.click()
+
+    def mousePressEvent(self, event):
+        console.info(f"Mouse pressed: {event.button()}")
+
+
 class D4mnStatusBar(QWidget):
-    stylesheet = "background-color: #999999; border-top: 2px solid #000000; font-size: 11px;"
+    stylesheet = (
+        "background-color: #999999; border-top: 2px solid #000000; font-size: 11px;"
+    )
     well_frame_width = 256
 
     def __init__(self):
@@ -77,7 +147,7 @@ class D4mnStatusBar(QWidget):
 
 class D4mnEmptyFrame(QWidget):
     stylesheet = (
-        "background-color: #FF00FF;color: white; font-size: 16px; font-weight=bold;"
+        "background-color: #99FF33; color: white; font-size: 16px; font-weight=bold;"
     )
 
     def __init__(self, message: str = "", width: int = 0, height: int = 0):
@@ -115,9 +185,7 @@ class D4mnEmptyFrame(QWidget):
                 self.frame_label.size().width(),
                 self.frame_label.size().height(),
             )
-            self.frame_label.setText(
-                f"{self.frame_message}\n{width}x{height}"
-            )
+            self.frame_label.setText(f"{self.frame_message}\n{width}x{height}")
 
 
 class D4mnImageFrame(QWidget):
@@ -131,7 +199,7 @@ class D4mnImageFrame(QWidget):
 
         frame_layout = QVBoxLayout()
         frame_layout.setContentsMargins(0, 0, 0, 0)
-        
+
         pixmap = QPixmap.fromImage(image)
         frame_label = QLabel()
         frame_label.setScaledContents(True)
@@ -164,7 +232,7 @@ class D4mnControlFrame(QWidget):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, source_dir: str, gallery_dir: str):
         super().__init__()
         self.setWindowTitle("PNGbin")
         self.setMinimumSize(1024, 768)
@@ -193,9 +261,25 @@ class MainWindow(QMainWindow):
         central_widget.setLayout(window_layout)
 
 
+def dir_path(path):
+    if os.path.isdir(path):
+        return path
+    raise argparse.ArgumentTypeError(f"'{path}' is not a valid directory")
+
+
 def main():
+    parser = argparse.ArgumentParser(description="PNGbin - Image Gallery Manager")
+    parser.add_argument(
+        "source_dir", type=dir_path, help="Directory containing source images"
+    )
+    parser.add_argument(
+        "gallery_dir", type=dir_path, help="Directory for the gallery output"
+    )
+
+    args = parser.parse_args()
+
     app = QApplication(sys.argv)
-    window = MainWindow()
+    window = MainWindow(args.source_dir, args.gallery_dir)
     window.show()
     sys.exit(app.exec())
 
