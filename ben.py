@@ -12,7 +12,29 @@ from PySide6.QtWidgets import (
     QSizePolicy,
 )
 
-from qdbg import console  # Assuming DEBUG, DEBUG_FILL_STYLE, LOG_LEVEL are not used
+from qdbg import *  # Assuming DEBUG, DEBUG_FILL_STYLE, LOG_LEVEL are not used
+
+
+MODIFIER_KEYS = {
+    "None": None,
+    "SHIFT": Qt.Key_Shift,
+    "CTRL": Qt.Key_Meta,
+    "ALT": Qt.Key_Alt,
+    "CMD": Qt.Key_Control,
+}
+
+BUTTON_NUMBERS = [
+    chr(0x24EA),
+    chr(0x2460),
+    chr(0x2461),
+    chr(0x2462),
+    chr(0x2463),
+    chr(0x2464),
+    chr(0x2465),
+    chr(0x2466),
+    chr(0x2467),
+    chr(0x2468),
+]
 
 
 class NumberedButton(QPushButton):  # More descriptive name
@@ -28,10 +50,11 @@ class NumberedButton(QPushButton):  # More descriptive name
         """
 
     _NUMBER_STYLESHEET = """
-        background-color: #66CCFF;
-        border: 1px solid black;
+        background-color: #000000;
         border-radius: 4px;
+        color: #FFFFFF;
         font-size: 16px;
+        font-weight: bold;
         """
 
     _TEXT_STYLESHEET = """
@@ -86,7 +109,9 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(2, 2, 2, 2)
         layout.setSpacing(2)
 
-        button = NumberedButton(1, "Untitled button", central_widget)  # Use NumberedButton, set parent
+        button = NumberedButton(
+            1, "Untitled button", central_widget
+        )  # Use NumberedButton, set parent
         layout.addWidget(button)
 
     def keyPressEvent(self, event: QKeyEvent):
