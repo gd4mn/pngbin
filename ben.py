@@ -16,7 +16,7 @@ from qdbg import *  # Assuming DEBUG, DEBUG_FILL_STYLE, LOG_LEVEL are not used
 
 
 MODIFIER_KEYS = {
-    "None": None,
+    "NONE": None,
     "SHIFT": Qt.Key_Shift,
     "CTRL": Qt.Key_Meta,
     "ALT": Qt.Key_Alt,
@@ -85,14 +85,29 @@ class NumberedButton(QPushButton):  # More descriptive name
         text_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         layout.addWidget(text_label)
 
-    def keyPressEvent(self, event: QKeyEvent):
-        console.info(f"Key/Combo: {event.qKeyCombination()}")
-        if event.key() == self.num + Qt.Key_0:
-            console.info(f"Button {self.num} pressed")
-            self.click()
 
-    def mousePressEvent(self, event):
-        console.info(f"Mouse pressed: {event.button()}")
+class ModifierStateWidget(QWidget):
+    """A widget to display the state of modifier keys."""
+    _STATE_LABEL_STYLESHEET = """
+        border: 1px solid black;
+        font-size: 10px;
+        font-weight: bold;
+        """
+
+    def __init__(self, parent=None):  # Add parent parameter
+        super().__init__(parent)
+
+        layout = QHBoxLayout(self, self)
+        for modifier_key, value in MODIFIER_KEYS.items():
+            label = QLabel(modifier_key, self)
+            label.setStyleSheet(self._STATE_LABEL_STYLESHEET)
+            label.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        
+
+
+
+    def toggle_modifier(self, key):
+        pass  # Implement functionality as needed
 
 
 class MainWindow(QMainWindow):
